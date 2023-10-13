@@ -1,0 +1,17 @@
+[package]
+name = "oracle_shield"
+version = "1.1.2"
+authors = ["Sorane Oumi <22672990+soraneoumi@users.noreply.github.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+ctrlc = "3.2"
+rand = { version = "0.8", features = ["small_rng"] }
+rayon = "1.5"
+nom = "7"
+chrono = "0.4"
+tokio = { version = "1.0", features = ["full"] }
+
+[profile.release]
+lto = true
