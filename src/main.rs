@@ -16,7 +16,7 @@ const CALCULATION_DURATION: u64 = 5 * 60;
 async fn main() {
     let Args { memory, frequency } = parse_and_validate_args();
     let memory_buffers = match memory {
-        Some(gib) => match memory::memory(gib) {
+        Some(gib) => match memory::allocate_memory(gib) {
             Ok(buffers) => Some(buffers),
             Err(e) => {
                 eprintln!("Failed to allocate memory: {}", e);
@@ -35,7 +35,7 @@ async fn main() {
     while is_running.load(Ordering::SeqCst) {
         if let Some(buffers) = &memory_buffers {
             for buffer in buffers {
-                let _ = buffer.b.read().unwrap()[0];
+                let _ = buffer.buffer.read().unwrap()[0];
             }
         }
         if last_calculation.elapsed() >= interval {
