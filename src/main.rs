@@ -15,9 +15,10 @@ const CALCULATION_DURATION: u64 = 5 * 60;
 #[tokio::main]
 async fn main() {
     let Args { memory, frequency } = parse_and_validate_args();
-    let memory_buffers = match memory {
+    let _memory_buffers = match memory {
         Some(gib) => match memory::allocate_memory(gib) {
             Ok(buffers) => {
+                // Call the simulation function
                 memory::simulate_memory_usage(&buffers);
                 Some(buffers)
             },
@@ -28,23 +29,23 @@ async fn main() {
         },
         None => None,
     };
+
     let interval = frequency
         .map(|f| Duration::from_secs(CALCULATION_INTERVAL_FACTOR / f as u64))
         .unwrap_or(Duration::from_secs(u64::MAX));
+
     let is_running = Arc::new(AtomicBool::new(true));
     set_signal_handler(is_running.clone()).await;
+
     let mut last_calculation = Instant::now();
     let mut calculation_start_time = None;
+
     while is_running.load(Ordering::SeqCst) {
-        if let Some(buffers) = &memory_buffers {
-            for buffer in buffers {
-                let _ = buffer.buffer[0];
-            }
-        }
         if last_calculation.elapsed() >= interval {
             calculation_start_time = Some(Instant::now());
             last_calculation = Instant::now();
         }
+
         if let Some(start_time) = calculation_start_time {
             if start_time.elapsed() < Duration::from_secs(CALCULATION_DURATION) {
                 cpu::calculate_pi(Duration::from_secs(CALCULATION_DURATION)).await;
@@ -52,6 +53,7 @@ async fn main() {
                 calculation_start_time = None;
             }
         }
+
         sleep(Duration::from_millis(100)).await;
     }
 }
