@@ -21,17 +21,12 @@ pub fn allocate_memory(gib: i32) -> Result<Vec<GiBObject>, Box<dyn std::error::E
         .into_par_iter()
         .map(|_| {
             let mut rng_buffer = Vec::with_capacity(GIB);
-            rng_buffer.resize(GIB, 0);
-
             let mut rng = SmallRng::from_entropy();
-            rng_buffer
-                .chunks_mut(MIB)
-                .for_each(|chunk| {
-                    for byte in chunk {
-                        *byte = rng.gen::<u8>();
-                    }
-                });
-
+            for _ in 0..(GIB / MIB) {
+                let mut chunk = vec![0u8; MIB];
+                rng.fill(chunk.as_mut_slice());
+                rng_buffer.extend(chunk);
+            }
             GiBObject { buffer: rng_buffer }
         })
         .collect();
