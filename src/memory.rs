@@ -38,21 +38,3 @@ pub fn allocate_memory(gib: i32) -> Result<Vec<GiBObject>, Box<dyn std::error::E
 
     Ok(memory_buffers)
 }
-
-pub fn simulate_memory_usage(buffers: &[GiBObject]) {
-    let mut rng = rand::thread_rng();
-
-    for buffer in buffers {
-        if rng.gen_bool(0.5) {
-            for byte in &buffer.buffer {
-                let _ = *byte;
-            }
-        } else {
-            let buffer_len = buffer.buffer.len();
-            for _ in 0..100 {
-                let index = rng.gen_range(0..buffer_len);
-                let _ = buffer.buffer[index];
-            }
-        }
-    }
-}
