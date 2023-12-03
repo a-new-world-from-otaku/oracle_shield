@@ -1,6 +1,6 @@
 [package]
 name = "oracle_shield"
-version = "1.1.2"
+version = "1.2.0"
 authors = ["Sorane Oumi <22672990+soraneoumi@users.noreply.github.com>"]
 edition = "2021"
 
