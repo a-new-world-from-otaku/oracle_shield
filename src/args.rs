@@ -11,7 +11,7 @@ use std::env;
 #[derive(Debug)]
 pub struct Args {
     pub memory: Option<i32>,
-    pub frequency: Option<i32>,
+    pub percent: Option<i32>,
 }
 
 fn parse_i32(input: &str) -> IResult<&str, i32> {
@@ -25,23 +25,23 @@ fn parse_memory(input: &str) -> IResult<&str, Option<i32>> {
     Ok((input, memory))
 }
 
-fn parse_frequency(input: &str) -> IResult<&str, Option<i32>> {
-    let (input, _) = alt((tag("--frequency"), tag("-f")))(input)?;
+fn parse_percent(input: &str) -> IResult<&str, Option<i32>> {
+    let (input, _) = alt((tag("--percent"), tag("-p")))(input)?;
     let (input, _) = opt(char(' '))(input)?;
-    let (input, frequency) = opt(parse_i32)(input)?;
-    Ok((input, frequency))
+    let (input, percent) = opt(parse_i32)(input)?;
+    Ok((input, percent))
 }
 
 fn parse_arg(input: &str) -> IResult<&str, Args> {
     let (input, _) = take_while(|c| c == ' ')(input)?;
     let (input, memory) = opt(parse_memory)(input)?;
     let (input, _) = take_while(|c| c == ' ')(input)?;
-    let (input, frequency) = opt(parse_frequency)(input)?;
+    let (input, percent) = opt(parse_percent)(input)?;
     Ok((
         input,
         Args {
             memory: memory.flatten(),
-            frequency: frequency.flatten(),
+            percent: percent.flatten(),
         },
     ))
 }

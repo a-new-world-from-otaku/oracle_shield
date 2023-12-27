@@ -7,14 +7,13 @@ use args::{parse_and_validate_args, Args};
 use signal::set_signal_handler;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use tokio::time::{Duration, Instant, sleep};
-
-const CALCULATION_INTERVAL_FACTOR: u64 = 30 * 24 * 60 * 60;
-const CALCULATION_DURATION: u64 = 5 * 60;
+use tokio::time::{Duration, sleep};
+use cgroups_rs::{cgroup_builder::CgroupBuilder, CgroupPid, hierarchies::auto};
 
 #[tokio::main]
 async fn main() {
-    let Args { memory, frequency } = parse_and_validate_args();
+    let Args { memory, percent } = parse_and_validate_args();
+
     let memory_buffers = match memory {
         Some(gib) => match memory::allocate_memory(gib) {
             Ok(buffers) => Some(buffers),
@@ -26,35 +25,40 @@ async fn main() {
         None => None,
     };
 
-    let interval = frequency
-        .map(|f| Duration::from_secs(CALCULATION_INTERVAL_FACTOR / f as u64))
-        .unwrap_or(Duration::from_secs(u64::MAX));
-
     let is_running = Arc::new(AtomicBool::new(true));
     set_signal_handler(is_running.clone()).await;
 
-    let mut last_calculation = Instant::now();
-    let mut calculation_start_time = None;
+    // Create cgroup
+    let cg = if let Some(cpu_percent) = percent {
+        let hier = auto();
+        let cgroup = CgroupBuilder::new("oracle_shield")
+            .cpu()
+            .shares(cpu_percent as u64)
+            .done()
+            .build(hier)
+            .expect("Failed to create cgroup");
+        
+        let pid = CgroupPid::from(std::process::id() as u64);
+        cgroup.add_task(pid).expect("Failed to add task to cgroup");
+
+        Some(cgroup)
+    } else {
+        None
+    };
 
     while is_running.load(Ordering::SeqCst) {
+        cpu::calculate_pi(Duration::from_secs(u64::MAX)).await;
+
         if let Some(buffers) = &memory_buffers {
             for buffer in buffers {
                 let _ = buffer.buffer[0];
             }
         }
-        if last_calculation.elapsed() >= interval {
-            calculation_start_time = Some(Instant::now());
-            last_calculation = Instant::now();
-        }
-
-        if let Some(start_time) = calculation_start_time {
-            if start_time.elapsed() < Duration::from_secs(CALCULATION_DURATION) {
-                cpu::calculate_pi(Duration::from_secs(CALCULATION_DURATION)).await;
-            } else {
-                calculation_start_time = None;
-            }
-        }
-
+        
         sleep(Duration::from_millis(100)).await;
+    }
+
+    if let Some(cgroup) = cg {
+        cgroup.delete().expect("Failed to delete cgroup");
     }
 }

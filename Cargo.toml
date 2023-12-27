@@ -12,6 +12,7 @@ rayon = "1.5"
 nom = "7"
 chrono = "0.4"
 tokio = { version = "1.0", features = ["full"] }
+cgroups-rs = "0.3.4"
 
 [profile.release]
 lto = true
