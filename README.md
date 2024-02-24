@@ -17,9 +17,9 @@ OracleShield is a solution developed to counteract Oracle's cloud computing reso
 Available options include:
 
 - `-m` or `--memory`: Specify the amount of memory to use (in GiB).
-- `-f` or `--frequency`: Specify the frequency of calculating Pi (in times per month).
+- `-p` or `--percent`: Specify the percent of CPU usage （as an integer between 0 and 100).
 
-For example, to use 4 GiB of memory and calculate Pi 10 times per month, run `./oracle_shield -m 4 -f 10`.
+For example, to use 4 GiB of memory and 10%, run `./oracle_shield -m 4 -p 10`.
 
 ## Note
 
