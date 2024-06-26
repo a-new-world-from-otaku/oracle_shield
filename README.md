@@ -2,6 +2,9 @@
 
 OracleShield is a solution developed to counteract Oracle's cloud computing resource reclamation program. It is written in Rust and uses the Tokio runtime.
 
+#NOTE
+This project is no longer being updated because there are extremely low-cost ways to combat oracle cloud's recycling strategy.
+
 ## Features
 
 - Efficient command line argument parsing: OracleShield uses the `nom` crate to efficiently parse command line arguments for memory and frequency.
